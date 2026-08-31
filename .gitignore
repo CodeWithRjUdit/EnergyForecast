@@ -1,0 +1,10 @@
+.conda/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+mlruns/
+mlflow.db
+data/raw/
+data/processed/
+models/*.pkl
+.env
