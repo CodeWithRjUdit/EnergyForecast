@@ -1,0 +1,5 @@
+outs:
+- md5: 4c9d4bf9947c89f89ff61408253ccea3
+  size: 1464366
+  hash: md5
+  path: xgboost_energy_forecast.pkl
