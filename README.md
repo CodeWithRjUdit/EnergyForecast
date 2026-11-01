@@ -26,7 +26,7 @@ Add the public Streamlit Community Cloud URL here after deploying the app.
 EnergyForecast/
 ├── app.py                     # Streamlit application and inference workflow
 ├── requirements.txt           # Minimal deployment dependencies
-├── runtime.txt                # Python runtime for Streamlit Cloud
+├── .streamlit/config.toml      # Streamlit theme and server settings
 ├── src/
 │   ├── features.py             # Shared feature engineering
 │   └── models/
@@ -89,9 +89,10 @@ The first forecast requires downloading the PJME dataset and training the XGBoos
 
 1. Open [Streamlit Community Cloud](https://share.streamlit.io/).
 2. Sign in with GitHub and authorize access to this repository.
-3. Select **New app**.
+3. Select **Create app**.
 4. Choose repository `CodeWithRjUdit/EnergyForecast`, branch `main`, and main file path `app.py`.
-5. Deploy the app. Streamlit will assign the public `streamlit.app` URL.
+5. Open **Advanced settings** and select Python 3.11.
+6. Deploy the app. Streamlit will assign a public `streamlit.app` URL.
 
 No API keys or Streamlit secrets are required.
 
