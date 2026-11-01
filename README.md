@@ -6,7 +6,7 @@ EnergyForecast predicts electricity demand from 1 hour up to 168 hours (7 days) 
 
 ## Live application
 
-Add the public Streamlit Community Cloud URL here after deployment.
+[Launch EnergyForecast](https://energyforecast-j3k287jidkghthk3ptuhnz.streamlit.app)
 
 ## Features
 
