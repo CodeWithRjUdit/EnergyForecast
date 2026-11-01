@@ -2,29 +2,30 @@
 
 **Short-term electricity demand forecasting with XGBoost, time-series feature engineering, and Streamlit.**
 
-EnergyForecast predicts electricity demand one hour ahead using historical hourly demand. The application includes an interactive PJM East (PJME) demonstration dataset and a CSV upload option for custom hourly demand data.
+EnergyForecast predicts electricity demand from 1 hour up to 168 hours (7 days) ahead using historical hourly demand. The app includes an interactive PJM East (PJME) demonstration dataset and a CSV upload option for custom hourly demand data.
 
 ## Live application
 
-Add the public Streamlit Community Cloud URL here after deploying the app.
+Add the public Streamlit Community Cloud URL here after deployment.
 
 ## Features
 
-- One-hour-ahead electricity-demand forecasting.
-- XGBoost regression using the project's original training recipe.
+- Select a forecast horizon from **1 to 168 hours**.
+- Recursive multi-step forecasting with the project's XGBoost regression recipe.
 - Calendar features: hour, day of week, month, and weekend indicator.
 - Lag features: 1, 2, 24, and 168 hours.
 - Rolling 24-hour mean and standard deviation, shifted to avoid target leakage.
 - Interactive historical demo using the PJME hourly-demand dataset.
 - CSV upload for custom hourly demand histories.
-- Forecast metric and recent-history chart.
-- Single-service Streamlit deployment; no separate FastAPI server is required.
+- Historical-versus-forecast chart and hour-by-hour forecast table.
+- Download forecasts as CSV.
+- Single-service Streamlit deployment; no separate FastAPI service is required.
 
 ## Application architecture
 
 ```text
 EnergyForecast/
-├── app.py                     # Streamlit application and inference workflow
+├── app.py                     # Streamlit application and recursive inference
 ├── requirements.txt           # Minimal deployment dependencies
 ├── .streamlit/config.toml      # Streamlit theme and server settings
 ├── src/
@@ -37,7 +38,15 @@ EnergyForecast/
 └── data/                       # DVC pointer for the raw PJME dataset
 ```
 
-The deployed Streamlit app calls the existing feature-engineering and XGBoost training code directly. This avoids the need to deploy and expose a second web service.
+The deployed Streamlit app calls the existing feature-engineering and XGBoost training code directly. This avoids deploying and exposing a second web service.
+
+## How multi-hour forecasting works
+
+The app uses **recursive forecasting**. It predicts the next hour, appends that prediction to the input history, and uses the updated history to predict the following hour. The process repeats until the selected horizon is reached.
+
+This approach makes it possible to forecast multiple hours with the existing one-step XGBoost model. However, prediction errors can compound as the horizon increases. Results beyond 24 hours should be treated as exploratory; robust longer-range forecasts would benefit from horizon-specific models and time-based backtesting.
+
+The app constructs each future timestamp's features at that future timestamp. This ensures that calendar features (hour, weekday, month) line up with the hour being predicted.
 
 ## Model and data availability
 
@@ -63,7 +72,7 @@ Requirements:
 - Demand values must be numeric.
 - Duplicate timestamps are consolidated by taking their mean.
 
-A CSV template is available inside the app.
+A CSV format example is available inside the app. Replace the example rows with at least 169 consecutive hourly observations before uploading.
 
 ## Run locally
 
@@ -100,6 +109,7 @@ No API keys or Streamlit secrets are required.
 
 - The PJME demo source is historical and ends in 2018; it must not be interpreted as current or real-time electricity demand.
 - The model is retrained when the Streamlit process starts without a warm cache. Initial model training can take longer than later forecasts.
+- Recursive forecasting feeds predictions back as inputs; uncertainty generally increases with the forecast horizon.
 - Custom CSV inputs should represent a consistent hourly demand series comparable to the model's training data.
 - Predictions are for educational and research demonstration, not grid operation or safety-critical decisions.
 
