@@ -10,3 +10,7 @@ data/processed/
 models/*.pkl
 !models/*.dvc
 .env
+
+node_modules/
+.env
+*.log

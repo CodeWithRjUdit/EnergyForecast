@@ -17,6 +17,15 @@ from src.models.ml_models import load_model
 
 app = FastAPI(title="EnergyForecast API")
 
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # tighten this in real production
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 MODEL_PATH = os.path.join(os.path.dirname(__file__), "..", "models", "xgboost_energy_forecast.pkl")
 model = load_model(MODEL_PATH)
 
@@ -34,6 +43,27 @@ class ForecastResponse(BaseModel):
     forecast_timestamp: str
     predicted_demand_mw: float
 
+@app.get("/demo-history")
+def demo_history(end_date: str):
+    """
+    Returns 169 hours of actual historical demand ending at end_date (inclusive),
+    for demo purposes. end_date format: 'YYYY-MM-DD HH:00:00'
+    """
+    from src.data_loader import load_pjm_data
+    df = load_pjm_data(os.path.join(os.path.dirname(__file__), "..", "data", "raw", "PJME_hourly.csv"))
+
+    end_ts = pd.to_datetime(end_date)
+    if end_ts not in df.index:
+        raise HTTPException(status_code=400, detail="end_date not found in dataset range (2002-01-01 to 2018-08-03).")
+
+    window = df.loc[:end_ts].iloc[-169:]
+    return {
+        "history": [
+            {"timestamp": str(idx), "demand_mw": float(row["PJME_MW"])}
+            for idx, row in window.iterrows()
+        ]
+    }
+
 
 @app.get("/")
 def root():
@@ -47,6 +77,8 @@ def predict(request: ForecastRequest):
             status_code=400,
             detail="At least 169 hours of history required (168 for lag_168, plus 1 to compute it against)."
         )
+
+
 
     # Build a DataFrame from the incoming history
     df = pd.DataFrame([{"Datetime": h.timestamp, "PJME_MW": h.demand_mw} for h in request.history])

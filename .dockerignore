@@ -1,0 +1,12 @@
+.conda/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+mlruns/
+mlflow.db
+.git/
+.dvc/
+data/raw/*.csv
+notebooks/
+tests/
+node_modules/
